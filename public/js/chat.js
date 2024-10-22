@@ -3,25 +3,31 @@ const socket = io()
 const form = document.querySelector('#message-form')
 const messageInput = form.querySelector('input[name="message"]')
 const formButton = form.querySelector('button')
+const locationButton = document.querySelector('#send-location')
 
 const messageContainer = document.querySelector('#messages')
 
-const locationButton = document.querySelector('#send-location')
+// Templates
+const messageTemplate = document.querySelector('#message-template').innerHTML
+const locationMessageTemplate = document.querySelector('#location-message-template').innerHTML
+
 
 socket.on('message', (message) => {
     console.log(message)
-    const div = document.createElement('div')
-    div.textContent = message
-    messageContainer.appendChild(div)
+    const html = Mustache.render(messageTemplate, {
+        message: message.text,
+        createdAt: moment(message.createdAt).format('h:mm a')
+    })
+    messageContainer.insertAdjacentHTML('beforeend', html)
 })
 
 socket.on('locationMessage', (message) => {
     console.log(message)
-    const a = document.createElement('a')
-    a.href = messageInput.value
-    a.textContent = 'My current location'
-    messageContainer.appendChild(a)
-
+    const html = Mustache.render(locationMessageTemplate, {
+        url: message.url,
+        createdAt: moment(message.createdAt).format('h:mm a')
+    })
+    messageContainer.insertAdjacentHTML('beforeend', html)
 })
 
 form.addEventListener('submit', (e) => {
